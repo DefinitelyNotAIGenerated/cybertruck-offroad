@@ -1,0 +1,21 @@
+{
+  "name": "cybertruck-offroad",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "server": "node server.js",
+    "start": "node server.js & vite --host",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "simplex-noise": "^4.0.3",
+    "three": "^0.170.0",
+    "ws": "^8.19.0"
+  },
+  "devDependencies": {
+    "vite": "^6.1.0"
+  }
+}

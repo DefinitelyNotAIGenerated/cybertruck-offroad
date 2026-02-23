@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Cybertruck Off-Road</title>
+  <meta name="description" content="Open world off-road driving game featuring a Tesla Cybertruck across procedurally generated terrain." />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="game-canvas"></canvas>
+
+    <!-- HUD Overlay -->
+    <div id="hud">
+      <div id="speed-panel">
+        <div id="speed-value">0</div>
+        <div id="speed-unit">KM/H</div>
+        <div id="gear-indicator">N</div>
+      </div>
+      <div id="controls-hint">
+        <div class="key-row">
+          <span class="key">W</span>
+        </div>
+        <div class="key-row">
+          <span class="key">A</span>
+          <span class="key">S</span>
+          <span class="key">D</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Title splash -->
+    <div id="title-splash">
+      <h1>CYBERTRUCK<br/><span>OFF-ROAD</span></h1>
+      <p class="desktop-hint">Press <strong>W</strong> to drive</p>
+      <p class="mobile-hint">Touch and drag to drive</p>
+    </div>
+
+    <!-- Touch controls are injected here by touch-controls.js on mobile -->
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
