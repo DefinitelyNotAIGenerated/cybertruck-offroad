@@ -1,14 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
   <title>Cybertruck Off-Road</title>
-  <meta name="description" content="Open world off-road driving game featuring a Tesla Cybertruck across procedurally generated terrain." />
+  <meta name="description"
+    content="Open world off-road driving game featuring procedurally generated terrain. Choose your vehicle." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Orbitron:wght@700;900&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="/src/style.css" />
 </head>
+
 <body>
   <div id="game-container">
     <canvas id="game-canvas"></canvas>
@@ -30,18 +37,189 @@
           <span class="key">D</span>
         </div>
       </div>
+      <button id="radio-mute-btn" title="Mute / Unmute CYBER FM">&#128266; CYBER FM</button>
     </div>
-
-    <!-- Title splash -->
-    <div id="title-splash">
-      <h1>CYBERTRUCK<br/><span>OFF-ROAD</span></h1>
-      <p class="desktop-hint">Press <strong>W</strong> to drive</p>
-      <p class="mobile-hint">Touch and drag to drive</p>
-    </div>
-
-    <!-- Touch controls are injected here by touch-controls.js on mobile -->
   </div>
 
+  <!-- Title + Vehicle Selection Splash — fixed overlay outside game-container -->
+  <div id="title-splash">
+    <div id="splash-bg-blur"></div>
+    <div id="splash-inner">
+
+      <!-- Title -->
+      <div id="splash-header">
+        <div id="game-eyebrow">CYBERTRUCK</div>
+        <h1 id="game-title">OFF-ROAD</h1>
+        <div id="game-subtitle">SELECT YOUR VEHICLE</div>
+      </div>
+
+      <!-- Vehicle Cards -->
+      <div id="car-select">
+
+        <!-- Cybertruck -->
+        <div class="car-card selected" data-vehicle="cybertruck" id="card-cybertruck">
+          <div class="car-card-glow"></div>
+          <div class="car-card-icon">
+            <svg viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
+              <!-- Cybertruck angular silhouette -->
+              <polygon points="10,46 22,20 50,13 95,13 112,30 112,46" fill="#8aabb8" stroke="#b8dde8"
+                stroke-width="1.5" />
+              <rect x="22" y="38" width="15" height="10" rx="5" fill="#0a0e18" />
+              <rect x="86" y="38" width="15" height="10" rx="5" fill="#0a0e18" />
+              <rect x="22" y="27" width="68" height="2.5" fill="#ddeeff" opacity="0.6" />
+              <line x1="10" y1="46" x2="112" y2="46" stroke="#b8dde8" stroke-width="0.5" opacity="0.3" />
+            </svg>
+          </div>
+          <div class="car-card-name">CYBERTRUCK</div>
+          <div class="car-card-tag">Electric · Angular · Fast</div>
+          <div class="car-card-stats">
+            <span class="stat">⚡ 22 m/s</span>
+            <span class="stat">🔄 High</span>
+          </div>
+          <div class="car-card-select-ring"></div>
+        </div>
+
+        <!-- PT Cruiser -->
+        <div class="car-card" data-vehicle="ptcruiser" id="card-ptcruiser">
+          <div class="car-card-glow"></div>
+          <div class="car-card-icon">
+            <svg viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
+              <!-- PT Cruiser rounded retro body -->
+              <path d="M8,46 C8,46 14,24 30,19 C46,14 74,13 89,19 C101,23 113,34 113,46 Z" fill="#c8a878"
+                stroke="#e0c090" stroke-width="1.5" />
+              <ellipse cx="30" cy="46" rx="10" ry="8" fill="#0a0e18" />
+              <ellipse cx="90" cy="46" rx="10" ry="8" fill="#0a0e18" />
+              <path d="M29,23 C29,23 52,17 86,19 C96,23 106,31 106,39 L29,39 Z" fill="#1a2535" opacity="0.75" />
+            </svg>
+          </div>
+          <div class="car-card-name">PT CRUISER</div>
+          <div class="car-card-tag">Retro · Stylish · Classic</div>
+          <div class="car-card-stats">
+            <span class="stat">⚡ 18 m/s</span>
+            <span class="stat">🔄 High</span>
+          </div>
+          <div class="car-card-select-ring"></div>
+        </div>
+
+        <!-- Abrams Tank -->
+        <div class="car-card" data-vehicle="tank" id="card-tank">
+          <div class="car-card-glow"></div>
+          <div class="car-card-icon">
+            <svg viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
+              <!-- Hull -->
+              <rect x="8" y="34" width="104" height="16" rx="2" fill="#4a5240" stroke="#6a7260" stroke-width="1.2" />
+              <!-- Turret -->
+              <rect x="26" y="20" width="60" height="16" rx="2" fill="#3d4535" stroke="#6a7260" stroke-width="1" />
+              <!-- Barrel -->
+              <rect x="68" y="24" width="46" height="5" rx="2" fill="#2e3328" />
+              <!-- Tracks -->
+              <rect x="6" y="45" width="108" height="6" rx="3" fill="#1a1e18" />
+              <!-- Track details -->
+              <rect x="10" y="46" width="8" height="4" rx="1" fill="#2a2e28" />
+              <rect x="24" y="46" width="8" height="4" rx="1" fill="#2a2e28" />
+              <rect x="38" y="46" width="8" height="4" rx="1" fill="#2a2e28" />
+              <rect x="84" y="46" width="8" height="4" rx="1" fill="#2a2e28" />
+              <rect x="98" y="46" width="8" height="4" rx="1" fill="#2a2e28" />
+            </svg>
+          </div>
+          <div class="car-card-name">ABRAMS TANK</div>
+          <div class="car-card-tag">M1A2 · Armored · Unstoppable</div>
+          <div class="car-card-stats">
+            <span class="stat">⚡ 10 m/s</span>
+            <span class="stat">🔄 Low</span>
+          </div>
+          <div class="car-card-select-ring"></div>
+        </div>
+
+      </div><!-- /#car-select -->
+
+      <!-- Keyboard hint -->
+      <div id="kbd-hint">
+        <span class="kbd-key">◀ ▶</span> or <span class="kbd-key">← →</span> to browse &nbsp;·&nbsp; <span
+          class="kbd-key">Enter</span> to drive
+      </div>
+
+      <button id="launch-btn">DRIVE NOW</button>
+    </div>
+  </div>
+
+  <!-- Touch controls injected here by touch-controls.js on mobile -->
+
   <script type="module" src="/src/main.js"></script>
+  <script src="/src/audio-sfx.js"></script>
+  <script>
+    // ── Vehicle Selection Splash Logic ──
+    (function () {
+      const VEHICLES = ['cybertruck', 'ptcruiser', 'tank'];
+      let selectedIndex = 0;
+
+      function getCards() {
+        return Array.from(document.querySelectorAll('.car-card'));
+      }
+
+      function selectByIndex(idx, animate) {
+        selectedIndex = (idx + VEHICLES.length) % VEHICLES.length;
+        getCards().forEach(function (card, i) {
+          card.classList.toggle('selected', i === selectedIndex);
+          if (animate && i === selectedIndex) {
+            card.classList.add('just-selected');
+            setTimeout(function () { card.classList.remove('just-selected'); }, 300);
+          }
+        });
+        window.__selectedVehicle = VEHICLES[selectedIndex];
+      }
+
+      // Initialize
+      window.__selectedVehicle = VEHICLES[0];
+
+      document.addEventListener('DOMContentLoaded', function () {
+        // Mouse / touch click on cards
+        getCards().forEach(function (card, i) {
+          card.addEventListener('click', function () {
+            selectByIndex(i, true);
+          });
+        });
+
+        // Keyboard: Arrow keys + Enter
+        document.addEventListener('keydown', function (e) {
+          const splash = document.getElementById('title-splash');
+          if (!splash || splash.style.display === 'none') return;
+
+          if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+            e.preventDefault();
+            selectByIndex(selectedIndex + 1, true);
+          } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            selectByIndex(selectedIndex - 1, true);
+          } else if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            launch();
+          }
+        });
+
+        // Launch button
+        document.getElementById('launch-btn').addEventListener('click', launch);
+
+        // Mute toggle for CYBER FM
+        const muteBtn = document.getElementById('radio-mute-btn');
+        if (muteBtn) {
+          muteBtn.addEventListener('click', function () {
+            if (window.CyberFM) {
+              var nowMuted = window.CyberFM.toggleMute();
+              muteBtn.textContent = nowMuted ? '🔇 CYBER FM' : '🔊 CYBER FM';
+              muteBtn.classList.toggle('muted', nowMuted);
+            }
+          });
+        }
+      });
+
+      function launch() {
+        if (window.startGame) {
+          window.startGame(window.__selectedVehicle);
+        }
+      }
+    })();
+  </script>
 </body>
+
 </html>

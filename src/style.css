@@ -1,17 +1,21 @@
 /* ─── Global Reset ─── */
-*, *::before, *::after {
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Orbitron:wght@700;900&display=swap');
+
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   width: 100%;
   height: 100%;
   overflow: hidden;
   background: #000;
-  font-family: 'Courier New', monospace;
-  /* Prevent mobile browser gestures */
+  font-family: 'Rajdhani', 'Courier New', monospace;
   overscroll-behavior: none;
   touch-action: none;
   -webkit-touch-callout: none;
@@ -20,9 +24,8 @@ html, body {
 }
 
 #game-container {
-  position: relative;
-  width: 100%;
-  height: 100%;
+  position: fixed;
+  inset: 0;
   touch-action: none;
 }
 
@@ -46,16 +49,16 @@ html, body {
   z-index: 10;
 }
 
-/* Speed Panel */
 #speed-panel {
-  background: rgba(10, 10, 15, 0.75);
+  background: rgba(8, 10, 18, 0.8);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(100, 200, 255, 0.18);
   border-radius: 14px;
   padding: 16px 28px;
   text-align: center;
   min-width: 130px;
+  box-shadow: 0 0 30px rgba(100, 200, 255, 0.05);
 }
 
 #speed-value {
@@ -64,15 +67,16 @@ html, body {
   color: #fff;
   line-height: 1;
   letter-spacing: -2px;
-  font-family: 'Courier New', monospace;
-  text-shadow: 0 0 20px rgba(100, 200, 255, 0.3);
+  font-family: 'Orbitron', 'Courier New', monospace;
+  text-shadow: 0 0 20px rgba(100, 200, 255, 0.4);
 }
 
 #speed-unit {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.45);
-  letter-spacing: 3px;
+  font-size: 11px;
+  color: rgba(100, 200, 255, 0.5);
+  letter-spacing: 4px;
   margin-top: 2px;
+  font-family: 'Rajdhani', monospace;
 }
 
 #gear-indicator {
@@ -81,6 +85,7 @@ html, body {
   color: #4cdf6b;
   margin-top: 6px;
   letter-spacing: 2px;
+  font-family: 'Orbitron', monospace;
 }
 
 #gear-indicator.reverse {
@@ -89,13 +94,45 @@ html, body {
 
 /* Controls hint */
 #controls-hint {
-  background: rgba(10, 10, 15, 0.55);
+  background: rgba(8, 10, 18, 0.55);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 10px;
   padding: 10px 14px;
   transition: opacity 0.8s ease;
+}
+
+/* Radio mute button */
+#radio-mute-btn {
+  font-family: 'Rajdhani', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: rgba(100, 200, 255, 0.75);
+  background: rgba(8, 10, 18, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(100, 200, 255, 0.18);
+  border-radius: 10px;
+  padding: 9px 16px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+  white-space: nowrap;
+  pointer-events: auto;
+  user-select: none;
+}
+
+#radio-mute-btn:hover {
+  border-color: rgba(100, 200, 255, 0.45);
+  color: #fff;
+  background: rgba(14, 22, 44, 0.7);
+}
+
+#radio-mute-btn.muted {
+  color: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.08);
+  text-decoration: line-through;
 }
 
 .key-row {
@@ -115,84 +152,375 @@ html, body {
   justify-content: center;
   width: 32px;
   height: 32px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 6px;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.5);
   font-size: 13px;
-  font-weight: 600;
-  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  font-family: 'Orbitron', monospace;
 }
 
-/* ─── Title Splash ─── */
+/* ═══════════════════════════════════════════
+   SPLASH OVERLAY — fixed, covers entire screen
+   ═══════════════════════════════════════════ */
 #title-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.9s ease;
+  overflow: hidden;
+}
+
+/* Blurred dark gradient backdrop */
+#splash-bg-blur {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(60, 120, 200, 0.25) 0%, transparent 70%),
+    linear-gradient(170deg, rgba(4, 6, 16, 0.96) 0%, rgba(8, 12, 28, 0.93) 100%);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+#splash-inner {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  background: radial-gradient(ellipse at center, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%);
-  z-index: 20;
-  pointer-events: none;
-  transition: opacity 1.2s ease;
+  gap: 36px;
+  max-width: 980px;
+  width: 100%;
+  padding: 48px 24px 40px;
 }
 
-#title-splash h1 {
+/* ─── Splash Header ─── */
+#splash-header {
+  text-align: center;
+}
+
+#game-eyebrow {
+  font-family: 'Rajdhani', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 10px;
+  color: rgba(100, 200, 255, 0.6);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+#game-title {
+  font-family: 'Orbitron', monospace;
   font-size: 72px;
   font-weight: 900;
   color: #fff;
-  text-align: center;
-  line-height: 1.05;
+  line-height: 1;
   letter-spacing: 8px;
   text-shadow:
-    0 0 40px rgba(100, 200, 255, 0.4),
-    0 0 80px rgba(100, 200, 255, 0.15);
-  font-family: 'Courier New', monospace;
+    0 0 40px rgba(100, 200, 255, 0.5),
+    0 0 100px rgba(100, 200, 255, 0.18);
 }
 
-#title-splash h1 span {
-  font-size: 40px;
-  font-weight: 300;
-  letter-spacing: 16px;
-  color: rgba(255, 255, 255, 0.65);
+#game-subtitle {
+  font-family: 'Rajdhani', monospace;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 14px;
+  color: rgba(180, 210, 255, 0.55);
+  margin-top: 14px;
+  text-transform: uppercase;
 }
 
-#title-splash p {
-  margin-top: 28px;
-  font-size: 16px;
-  color: rgba(255, 255, 255, 0.5);
+/* ─── Car Selection Grid ─── */
+#car-select {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
+.car-card {
+  position: relative;
+  flex: 1 1 0;
+  max-width: 280px;
+  min-width: 200px;
+  background: rgba(10, 14, 28, 0.72);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 26px 20px 20px;
+  cursor: pointer;
+  transition:
+    border-color 0.22s ease,
+    background 0.22s ease,
+    transform 0.2s ease,
+    box-shadow 0.22s ease;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  overflow: hidden;
+  /* Ensure pointer events always work */
+  pointer-events: auto;
+}
+
+/* Inner glow blob — hidden unless selected */
+.car-card-glow {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 120px;
+  border-radius: 50%;
+  background: rgba(100, 200, 255, 0.0);
+  filter: blur(30px);
+  transition: background 0.3s ease;
+  pointer-events: none;
+}
+
+.car-card:hover {
+  border-color: rgba(100, 200, 255, 0.3);
+  background: rgba(18, 26, 54, 0.78);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 40px rgba(100, 200, 255, 0.08);
+}
+
+.car-card:hover .car-card-glow {
+  background: rgba(100, 200, 255, 0.06);
+}
+
+.car-card.selected {
+  border-color: rgba(100, 200, 255, 0.75);
+  background: rgba(14, 28, 62, 0.88);
+  transform: translateY(-6px);
+  box-shadow:
+    0 0 0 1px rgba(100, 200, 255, 0.25),
+    0 12px 50px rgba(100, 200, 255, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.car-card.selected .car-card-glow {
+  background: rgba(100, 200, 255, 0.12);
+}
+
+/* Animated "just selected" bounce */
+.car-card.just-selected {
+  animation: card-bounce 0.28s ease;
+}
+
+@keyframes card-bounce {
+  0% {
+    transform: translateY(-6px) scale(1);
+  }
+
+  40% {
+    transform: translateY(-10px) scale(1.03);
+  }
+
+  100% {
+    transform: translateY(-6px) scale(1);
+  }
+}
+
+/* Selected checkmark badge */
+.car-card.selected::before {
+  content: '✓';
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 22px;
+  height: 22px;
+  background: rgba(100, 200, 255, 0.9);
+  color: #000;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 22px;
+  animation: badge-pop 0.2s ease;
+}
+
+@keyframes badge-pop {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Bottom accent line on selected card */
+.car-card-select-ring {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(100, 200, 255, 0.7), transparent);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  border-radius: 0 0 18px 18px;
+}
+
+.car-card.selected .car-card-select-ring {
+  opacity: 1;
+}
+
+/* SVG illustration area */
+.car-card-icon {
+  width: 100%;
+  max-width: 180px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.car-card-icon svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 2px 8px rgba(100, 200, 255, 0.2));
+  transition: filter 0.25s ease;
+}
+
+.car-card.selected .car-card-icon svg {
+  filter: drop-shadow(0 2px 20px rgba(100, 200, 255, 0.65));
+}
+
+.car-card-name {
+  font-family: 'Orbitron', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
   letter-spacing: 3px;
-  animation: pulse 2s ease-in-out infinite;
+  margin-top: 4px;
 }
 
-#title-splash p strong {
-  color: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.05);
+.car-card-tag {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.38);
+  letter-spacing: 0.5px;
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
+.car-card-stats {
+  display: flex;
+  gap: 8px;
+  margin-top: 2px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.stat {
+  font-size: 11px;
+  font-family: 'Rajdhani', monospace;
+  color: rgba(100, 200, 255, 0.75);
+  background: rgba(100, 200, 255, 0.06);
+  border: 1px solid rgba(100, 200, 255, 0.14);
+  border-radius: 6px;
+  padding: 3px 9px;
+  letter-spacing: 0.5px;
+}
+
+/* ─── Keyboard Hint ─── */
+#kbd-hint {
+  font-family: 'Rajdhani', monospace;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.28);
+  letter-spacing: 1px;
+}
+
+.kbd-key {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 5px;
+  padding: 1px 7px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* ─── Launch Button ─── */
+#launch-btn {
+  font-family: 'Orbitron', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 6px;
+  color: #000;
+  background: linear-gradient(135deg, #64c8ff 0%, #48aaff 60%, #2277dd 100%);
+  border: none;
+  border-radius: 12px;
+  padding: 17px 64px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  box-shadow:
+    0 4px 28px rgba(100, 200, 255, 0.45),
+    0 0 0 1px rgba(100, 200, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+#launch-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18), transparent);
+  transition: left 0.5s ease;
+}
+
+#launch-btn:hover::before {
+  left: 100%;
+}
+
+#launch-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow:
+    0 8px 40px rgba(100, 200, 255, 0.6),
+    0 0 0 1px rgba(100, 200, 255, 0.45);
+  filter: brightness(1.08);
+}
+
+#launch-btn:active {
+  transform: scale(0.97);
 }
 
 /* ─── Desktop / Mobile hint visibility ─── */
-/* Default: show desktop hint, hide mobile hint */
-.mobile-hint { display: none; }
-.desktop-hint { display: block; }
+.mobile-hint {
+  display: none;
+}
 
-/* On mobile: swap visibility */
-.mobile .mobile-hint { display: block; }
-.mobile .desktop-hint { display: none; }
+.desktop-hint {
+  display: block;
+}
 
-/* Hide keyboard controls hint on mobile */
-.mobile #controls-hint { display: none !important; }
+.mobile .mobile-hint {
+  display: block;
+}
+
+.mobile .desktop-hint {
+  display: none;
+}
+
+.mobile #controls-hint {
+  display: none !important;
+}
 
 /* ─── Virtual Joystick ─── */
 #joystick-zone {
@@ -203,8 +531,6 @@ html, body {
   height: 60%;
   z-index: 15;
   pointer-events: auto;
-  /* Debug: uncomment below to see zone */
-  /* background: rgba(255, 0, 0, 0.05); */
 }
 
 #joystick-base {
@@ -215,8 +541,8 @@ html, body {
   margin-left: -60px;
   margin-top: -60px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  border: 2px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.07);
+  border: 2px solid rgba(255, 255, 255, 0.14);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   pointer-events: none;
@@ -230,13 +556,13 @@ html, body {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(100, 200, 255, 0.5) 0%, rgba(100, 200, 255, 0.15) 100%);
+  background: radial-gradient(circle, rgba(100, 200, 255, 0.5), rgba(100, 200, 255, 0.15));
   border: 2px solid rgba(100, 200, 255, 0.4);
   box-shadow: 0 0 20px rgba(100, 200, 255, 0.2);
   pointer-events: none;
 }
 
-/* ─── Mobile Responsive (small screens) ─── */
+/* ─── Mobile Responsive ─── */
 @media (max-width: 768px) {
   #hud {
     bottom: 16px;
@@ -263,24 +589,59 @@ html, body {
     font-size: 18px;
   }
 
-  #title-splash h1 {
-    font-size: 42px;
+  #game-title {
+    font-size: 44px;
+    letter-spacing: 5px;
+  }
+
+  #game-subtitle {
+    font-size: 11px;
+    letter-spacing: 9px;
+  }
+
+  #car-select {
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .car-card {
+    flex: 1 1 150px;
+    max-width: 46%;
+    min-width: 140px;
+    padding: 18px 12px 16px;
+  }
+
+  .car-card-icon {
+    height: 60px;
+  }
+
+  .car-card-name {
+    font-size: 11px;
+    letter-spacing: 2px;
+  }
+
+  #launch-btn {
+    padding: 14px 44px;
+    font-size: 13px;
     letter-spacing: 4px;
-  }
-
-  #title-splash h1 span {
-    font-size: 24px;
-    letter-spacing: 10px;
-  }
-
-  #title-splash p {
-    font-size: 14px;
-    margin-top: 20px;
   }
 }
 
-/* Even smaller phones */
-@media (max-width: 420px) {
+@media (max-width: 480px) {
+  #car-select {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .car-card {
+    max-width: 88%;
+    min-width: unset;
+  }
+
+  #game-title {
+    font-size: 36px;
+  }
+
   #speed-panel {
     padding: 8px 14px;
     min-width: 76px;
@@ -288,15 +649,5 @@ html, body {
 
   #speed-value {
     font-size: 28px;
-  }
-
-  #title-splash h1 {
-    font-size: 32px;
-    letter-spacing: 3px;
-  }
-
-  #title-splash h1 span {
-    font-size: 18px;
-    letter-spacing: 6px;
   }
 }

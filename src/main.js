@@ -2,7 +2,8 @@
 
 import * as THREE from 'three';
 import { createTerrain } from './terrain.js';
-import { createCybertruck, VehiclePhysics } from './cybertruck.js';
+import { VehiclePhysics } from './cybertruck.js';
+import { buildVehicle } from './vehicles.js';
 import { populateFoliage } from './foliage.js';
 import { createChaseCamera } from './camera.js';
 import { updateHUD, hideSplash, hideControlsHint } from './hud.js';
@@ -10,6 +11,7 @@ import { input } from './input.js';
 import { isMobile } from './device.js';
 import { initNetwork, sendState, getRemotePlayers } from './network.js';
 import { GhostTruckManager } from './ghost-trucks.js';
+import { CyberFM } from './audio-radio.js';
 
 // ── Scene ──
 const scene = new THREE.Scene();
@@ -20,7 +22,7 @@ scene.fog = new THREE.FogExp2(0x7ba4d8, 0.003);
 const canvas = document.getElementById('game-canvas');
 const renderer = new THREE.WebGLRenderer({
     canvas,
-    antialias: !isMobile,  // disable AA on mobile for performance
+    antialias: !isMobile,
     powerPreference: 'high-performance',
 });
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -38,15 +40,12 @@ const camera = new THREE.PerspectiveCamera(
 );
 
 // ── Lighting ──
-// Ambient
 const ambient = new THREE.AmbientLight(0xcccccc, 0.7);
 scene.add(ambient);
 
-// Hemisphere (sky/ground)
 const hemiLight = new THREE.HemisphereLight(0x7ba4d8, 0x567d46, 0.6);
 scene.add(hemiLight);
 
-// Sun (directional)
 const sun = new THREE.DirectionalLight(0xffffff, 1.3);
 sun.position.set(120, 180, 80);
 sun.castShadow = true;
@@ -62,12 +61,11 @@ sun.shadow.camera.bottom = -80;
 sun.shadow.bias = -0.001;
 scene.add(sun);
 
-// Secondary fill light
 const fillLight = new THREE.DirectionalLight(0x6688cc, 0.3);
 fillLight.position.set(-60, 40, -30);
 scene.add(fillLight);
 
-// ── Sky dome (gradient) ──
+// ── Sky dome ──
 const skyGeo = new THREE.SphereGeometry(400, 32, 15);
 const skyMat = new THREE.ShaderMaterial({
     side: THREE.BackSide,
@@ -109,14 +107,15 @@ scene.add(terrain);
 console.log('Placing foliage...');
 populateFoliage(scene);
 
-// ── Cybertruck ──
-console.log('Building Cybertruck...');
-const { group: truckGroup, wheels } = createCybertruck();
-scene.add(truckGroup);
-const vehicle = new VehiclePhysics(truckGroup, wheels);
+// ── Vehicle (spawned after car selection) ──
+let truckGroup = null;
+let wheels = null;
+let vehicle = null;
 
-// ── Camera controller ──
 const chaseCam = createChaseCamera(camera);
+const shadowTarget = new THREE.Object3D();
+scene.add(shadowTarget);
+sun.target = shadowTarget;
 
 // ── Multiplayer ──
 console.log('Initializing multiplayer...');
@@ -130,7 +129,7 @@ const dustPositions = new Float32Array(dustCount * 3);
 const dustVelocities = [];
 for (let i = 0; i < dustCount; i++) {
     dustPositions[i * 3] = 0;
-    dustPositions[i * 3 + 1] = -100; // hidden initially
+    dustPositions[i * 3 + 1] = -100;
     dustPositions[i * 3 + 2] = 0;
     dustVelocities.push(new THREE.Vector3());
 }
@@ -144,22 +143,20 @@ const dustMat = new THREE.PointsMaterial({
 });
 const dustParticles = new THREE.Points(dustGeo, dustMat);
 scene.add(dustParticles);
-
 let dustIndex = 0;
 
 function emitDust(position, speed) {
-    if (speed < 5) return;
-
-    const count = Math.min(3, Math.floor(speed / 15));
+    if (speed < 3) return;
+    const count = Math.min(3, Math.floor(speed / 6));
     for (let i = 0; i < count; i++) {
         const idx = dustIndex % dustCount;
         dustPositions[idx * 3] = position.x + (Math.random() - 0.5) * 1.5;
         dustPositions[idx * 3 + 1] = position.y + 0.2;
         dustPositions[idx * 3 + 2] = position.z + (Math.random() - 0.5) * 1.5;
         dustVelocities[idx].set(
-            (Math.random() - 0.5) * 3,
-            1 + Math.random() * 2,
-            (Math.random() - 0.5) * 3
+            (Math.random() - 0.5) * 2,
+            0.8 + Math.random() * 1.5,
+            (Math.random() - 0.5) * 2
         );
         dustIndex++;
     }
@@ -170,39 +167,24 @@ function updateDust(dt) {
         dustPositions[i * 3] += dustVelocities[i].x * dt;
         dustPositions[i * 3 + 1] += dustVelocities[i].y * dt;
         dustPositions[i * 3 + 2] += dustVelocities[i].z * dt;
-        dustVelocities[i].y -= 2 * dt; // gravity
-        dustVelocities[i].multiplyScalar(0.98); // drag
+        dustVelocities[i].y -= 2 * dt;
+        dustVelocities[i].multiplyScalar(0.98);
     }
     dustGeo.attributes.position.needsUpdate = true;
 }
 
-// ── Splash screen logic ──
-let splashDismissed = false;
-
-// ── Shadow target follows truck ──
-const shadowTarget = new THREE.Object3D();
-scene.add(shadowTarget);
-sun.target = shadowTarget;
-
 // ── Game loop ──
 const clock = new THREE.Clock();
+let gameStarted = false;
 
 function animate() {
     requestAnimationFrame(animate);
-
     const dt = clock.getDelta();
 
-    // Dismiss splash on first input
-    if (!splashDismissed && input.anyKey) {
-        splashDismissed = true;
-        hideSplash();
-        hideControlsHint();
-    }
+    if (!gameStarted || !vehicle) return;
 
-    // Update vehicle
     vehicle.update(dt);
 
-    // Move shadow to track the truck
     shadowTarget.position.copy(truckGroup.position);
     sun.position.set(
         truckGroup.position.x + 120,
@@ -210,25 +192,37 @@ function animate() {
         truckGroup.position.z + 80
     );
 
-    // Dust
     if (vehicle.grounded) {
         emitDust(truckGroup.position, Math.abs(vehicle.speed));
     }
     updateDust(dt);
 
-    // Camera
     chaseCam.update(dt, truckGroup, vehicle.speed);
-
-    // HUD
     updateHUD(vehicle.getSpeedKmh(), vehicle.getGear());
-
-    // Multiplayer — send local state & update ghosts
     sendState(truckGroup, vehicle.speed);
     ghostManager.update(getRemotePlayers(), dt);
 
-    // Render
     renderer.render(scene, camera);
 }
+
+// ── Car Selection → Game Start ──
+function startGame(vehicleType) {
+    console.log('Building vehicle:', vehicleType);
+    const built = buildVehicle(vehicleType);
+    truckGroup = built.group;
+    wheels = built.wheels;
+    scene.add(truckGroup);
+    vehicle = new VehiclePhysics(truckGroup, wheels, vehicleType);
+    gameStarted = true;
+    hideSplash();
+    hideControlsHint();
+    // Start CYBER FM radio station
+    CyberFM.start();
+}
+// Expose globally so the inline non-module <script> in index.html can call it
+window.startGame = startGame;
+// Expose CyberFM for the mute button
+window.CyberFM = CyberFM;
 
 // ── Resize handler ──
 window.addEventListener('resize', () => {
@@ -237,6 +231,8 @@ window.addEventListener('resize', () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// ── Start ──
-console.log('Starting game loop...');
+// ── Start render loop (scene renders even before game starts) ──
+console.log('Starting render loop...');
+// Do an initial render so the terrain is visible behind the splash
+renderer.render(scene, camera);
 animate();

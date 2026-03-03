@@ -1,7 +1,7 @@
 /* ─── Ghost Truck Renderer ─── */
 
 import * as THREE from 'three';
-import { createCybertruck } from './cybertruck.js';
+import { buildCybertruck } from './vehicles.js';
 
 const GHOST_COLORS = {
     0: 0xb0b0b0,  // gray (default, shouldn't appear as ghost)
@@ -65,7 +65,7 @@ export class GhostTruckManager {
     }
 
     _createGhost(playerId) {
-        const { group } = createCybertruck();
+        const { group } = buildCybertruck();
 
         // Apply ghost tint color
         const tintColor = new THREE.Color(GHOST_COLORS[playerId] || 0x88bbff);
